@@ -1,4 +1,4 @@
-package request
+package ckRequest
 
 import (
 	"io"

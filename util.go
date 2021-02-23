@@ -1,4 +1,4 @@
-package request
+package ckRequest
 
 import (
 	"bytes"
@@ -13,43 +13,43 @@ import (
 	"github.com/rodaine/table"
 )
 
-func JsonErr(err error, data []byte) {
+func jsonErr(err error, data []byte) {
 	if err != nil {
 		ioutil.WriteFile(kJsonParseErrFilePath, data, 0666)
 		printParseErrDetailMsg(data, nil)
-		PanicIf(err)
+		panicIf(err)
 	}
 }
 
-func ReactIf(err error, f func()) {
+func reactIf(err error, f func()) {
 	if err != nil {
 		f()
-		PanicIf(err)
+		panicIf(err)
 	}
 }
 
-func JsonToMap(data []byte) map[string]interface{} {
+func jsonToMap(data []byte) map[string]interface{} {
 	var d map[string]interface{}
-	JsonErr(json.Unmarshal(data, &d), data)
+	jsonErr(json.Unmarshal(data, &d), data)
 	return d
 }
 
-func JsonToStruct(data []byte, v interface{}) {
-	JsonErr(json.Unmarshal(data, v), data)
+func jsonToStruct(data []byte, v interface{}) {
+	jsonErr(json.Unmarshal(data, v), data)
 }
 
-func JsonConvert(data []byte, v interface{}) error {
+func jsonConvert(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }
 
-func IsHtml(data []byte) bool {
+func isHtml(data []byte) bool {
 	return bytes.Contains(data, []byte("<!DOCTYPE html")) ||
 		bytes.Contains(data, []byte("<html>")) ||
 		bytes.Contains(data, []byte("<body>")) ||
 		bytes.Contains(data, []byte("<div>"))
 }
 
-func IsJson(data []byte) bool {
+func isJson(data []byte) bool {
 	return data[0] == byte('{')
 }
 
@@ -67,10 +67,10 @@ func printParseErrDetailMsg(data []byte, cb jsonParseErrCallbackFunc) {
 	details := "null"
 	suggest := "检查" + kJsonParseErrFilePath
 	if cb != nil {
-		if IsHtml(data) {
+		if isHtml(data) {
 			dataType = "html"
 			details, suggest = cb(data)
-		} else if IsJson(data) {
+		} else if isJson(data) {
 			dataType = "json"
 			details, suggest = cb(data)
 		}
@@ -79,7 +79,7 @@ func printParseErrDetailMsg(data []byte, cb jsonParseErrCallbackFunc) {
 	tab.Print()
 }
 
-func PanicIf(err error) {
+func panicIf(err error) {
 	if err == nil {
 		return
 	}
@@ -112,6 +112,6 @@ func atoi(number string) (int, error) {
 
 func atoiMust(number string) int {
 	i, err := strconv.Atoi(number)
-	PanicIf(err)
+	panicIf(err)
 	return i
 }

@@ -1,4 +1,4 @@
-package request
+package ckRequest
 
 import (
 	"net/http"
@@ -22,7 +22,6 @@ func DefaultRedirectCb(req *http.Request, via []*http.Request) error {
 	return nil
 }
 
-
 func (c *HttpClient) autoRedirect(ireq *HttpReq) *HttpResp {
 	req := ireq
 	var respW *HttpResp
@@ -30,7 +29,7 @@ func (c *HttpClient) autoRedirect(ireq *HttpReq) *HttpResp {
 		resp, err := c.Cl.Do(req.Request)
 		respW = newResponse(resp, err)
 
-		PanicIf(err)
+		panicIf(err)
 
 		redirectMethod, shouldRedirect, includeBody := redirectBehavior(req.Method, resp, ireq.Request)
 
@@ -42,19 +41,19 @@ func (c *HttpClient) autoRedirect(ireq *HttpReq) *HttpResp {
 			}
 			break
 		}
-		if ireq == req{
+		if ireq == req {
 			logRequest(req, nil, "ireq")
 		}
 		logRequest(nil, respW, "redirect")
 
 		location, err := resp.Location()
-		PanicIf(err)
+		panicIf(err)
 		ref := refererForURL(resp.Request.URL, location)
 		req = NewRequest(redirectMethod, location.String(), nil).Referer(ref)
 		if includeBody && ireq.GetBody != nil {
 			// GetBody是一个closure,所以即使读完再调用也可以获取最初的snapshot
 			req.Body, err = ireq.GetBody()
-			PanicIf(err)
+			panicIf(err)
 		}
 	}
 	return respW

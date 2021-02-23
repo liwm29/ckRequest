@@ -1,4 +1,4 @@
-package request
+package ckRequest
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ func (resp *HttpResp) Bytes() []byte {
 	}
 
 	bytes, err := ioutil.ReadAll(resp.Body)
-	PanicIf(err)
+	panicIf(err)
 	resp.Body.Close()
 	resp.copy = bytes
 	resp.isRead = true

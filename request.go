@@ -1,4 +1,4 @@
-package request
+package ckRequest
 
 import (
 	"bytes"
@@ -68,7 +68,7 @@ func PostFormAny(url_ string, body interface{}) *HttpReq {
 	case reflect.Map:
 		mapStrSliceStr, err := cast.ToStringMapStringSliceE(v.Interface())
 		if err != nil {
-			PanicIf(wrapError("PostFormStruct:", err))
+			panicIf(wrapError("PostFormStruct:", err))
 		}
 		data = mapStrSliceStr
 	}
@@ -76,31 +76,37 @@ func PostFormAny(url_ string, body interface{}) *HttpReq {
 	return PostForm(url_, data.Encode())
 }
 
+type File struct {
+	FilePath string
+}
+
 // use "mime/multipart"
-func PostMultiPart(url string, body interface{}) *HttpReq {
+func PostMultiPart(url string, body map[string]interface{}) *HttpReq {
 	payload := &bytes.Buffer{}
 	writer := multipart.NewWriter(payload)
-	file, errFile1 := os.Open("filepath")
-	defer file.Close()
-	part1,
-		errFile1 := writer.CreateFormFile("asdf", filepath.Base("/C:/Users/salvare000/Desktop/信息安全技术/18341018_李伟铭_lab5.pdf"))
-	_, errFile1 = io.Copy(part1, file)
-	if errFile1 != nil {
-		return nil
+	for k, v := range body {
+		switch z := v.(type) {
+		case File:
+			file, errFile1 := os.Open(z.FilePath)
+			defer file.Close()
+			part1,
+				errFile1 := writer.CreateFormFile(k, filepath.Base(z.FilePath))
+			_, errFile1 = io.Copy(part1, file)
+			panicIf(wrapError("postMultiPart:", errFile1))
+		case string:
+			_ = writer.WriteField(k, z)
+		}
 	}
-	_ = writer.WriteField("asdf", "fdsa")
 	err := writer.Close()
-	if err != nil {
-		return nil
-	}
+	panicIf(wrapError("close multipartWriter:", err))
 
 	req := PostForm(url, payload.String())
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	return req
 }
 
-func PostMIME(url string, img []byte) *HttpReq {
-	return nil
+func PostMIMEJpg(url string, img []byte) *HttpReq {
+	return Post(url, bytes.NewReader(img)).Jpeg()
 }
 
 type Clienter interface {
@@ -120,10 +126,10 @@ func (r *HttpReq) string() string {
 		return ""
 	}
 	reader, err := r.GetBody()
-	PanicIf(err)
+	panicIf(err)
 	buf := [1024]byte{}
 	n, err := reader.Read(buf[:])
-	PanicIf(err)
+	panicIf(err)
 	// if n == 1024,we just discard the left
 	reader.Close()
 	return string(buf[:n])

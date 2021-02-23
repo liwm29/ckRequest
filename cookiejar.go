@@ -7,7 +7,7 @@
 最好的实现应该是container/list,但是list没办法json.marshall
 */
 
-package request
+package ckRequest
 
 import (
 	"encoding/json"
