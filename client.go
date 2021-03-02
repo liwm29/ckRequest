@@ -1,8 +1,8 @@
 package ckRequest
 
 import (
-	"io"
 	"net/http"
+	"net/url"
 )
 
 type HttpClient struct {
@@ -23,20 +23,14 @@ func (c *HttpClient) Do(req *HttpReq) *HttpResp {
 	return c.autoRedirect(req)
 }
 
-func (c *HttpClient) Get(url string) *HttpResp {
-	return Get(url).Do(c)
+func (c *HttpClient) DisableKeepAlive() {
+	c.Cl.Transport.(*http.Transport).DisableKeepAlives = true
 }
 
-func (c *HttpClient) Post(url string, body io.Reader) *HttpResp {
-	return Post(url, body).Do(c)
-}
-
-func (c *HttpClient) PostJson(url, body string) *HttpResp {
-	return PostJson(url, body).Do(c)
-}
-
-func (c *HttpClient) PostForm(url, body string) *HttpResp {
-	return PostForm(url, body).Do(c)
+func (c *HttpClient) SetProxy(addr string) {
+	c.Cl.Transport.(*http.Transport).Proxy = func(r *http.Request) (*url.URL, error) {
+		return url.Parse(addr)
+	}
 }
 
 func (c *HttpClient) StoreCookies(filepath string) error {

@@ -33,15 +33,11 @@ type HttpClient struct {
 var DefaultClient *HttpClient
 func NewClient() *HttpClient
 
+// if u want to send req , use NewRequest().Do(client)
 func (c *HttpClient) Do(req *HttpReq) *HttpResp
 
-func (c *HttpClient) Get(url string) *HttpResp
-
-func (c *HttpClient) LoadCookies(filepath string) error
-
-func (c *HttpClient) Post(url string, body io.Reader) *HttpResp
-
-func (c *HttpClient) PostForm(url, body string) *HttpResp
+func (c *HttpClient) DisableKeepAlive()
+func (c *HttpClient) SetProxy(addr string)
 
 func (c *HttpClient) PostJson(url, body string) *HttpResp
 
